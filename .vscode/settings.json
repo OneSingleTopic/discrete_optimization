@@ -1,0 +1,13 @@
+{
+  "python.formatting.provider": "black",
+  "python.formatting.blackArgs": ["--line-length=79"],
+  "editor.formatOnSave": true,
+  "files.exclude": {
+    "**/__pycache__/**": true,
+    "**/*egg-info/**": true,
+    "**/.ipynb_checkpoints/**": true
+  },
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestPath": "~/.virtualenvs/discrete_optimization/bin/pytest",
+  "python.pythonPath": "/home/valin/.virtualenvs/discrete_optimization/bin/python3"
+}

@@ -1,0 +1,9 @@
+my_solvers
+setup.py
+my_solvers/__init__.py
+my_solvers/solvers.py
+my_solvers.egg-info/PKG-INFO
+my_solvers.egg-info/SOURCES.txt
+my_solvers.egg-info/dependency_links.txt
+my_solvers.egg-info/requires.txt
+my_solvers.egg-info/top_level.txt
