@@ -1,5 +1,0 @@
-
-[dev]
-black
-jupyter
-pytest
