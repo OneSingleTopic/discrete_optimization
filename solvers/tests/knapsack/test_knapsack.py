@@ -1,6 +1,6 @@
 import os
 
-from my_solvers import knapsack
+from my_solvers.knapsack import knapsack
 
 RESOURCES_FOLDER = "resources/knapsack/data"
 SIMPLE_DATA = os.path.join(RESOURCES_FOLDER, "simple")

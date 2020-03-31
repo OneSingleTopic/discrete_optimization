@@ -1,6 +1,8 @@
 from collections import namedtuple
 
-Item = namedtuple("Item", ["index", "value", "weight"])
+from my_solvers.knapsack.common import Item
+from my_solvers.knapsack.greedy import Greedy
+from my_solvers.knapsack.dynamic_programing import Dynamic_Programing
 
 
 def parse_input(input_data):
@@ -18,3 +20,11 @@ def parse_input(input_data):
         items.append(Item(i - 1, int(parts[0]), int(parts[1])))
 
     return item_count, capacity, items
+
+
+def solve(capacity, items):
+
+    # if len(items) > 100:
+    #     return Greedy.from_input(capacity, items).solve()
+
+    return Dynamic_Programing.from_input(capacity, items).solution
