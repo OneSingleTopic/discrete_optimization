@@ -2,6 +2,8 @@ from ortools.sat.python import cp_model
 from pprint import pprint
 from dataclasses import dataclass
 
+import numpy as np
+
 
 @dataclass
 class Node:
@@ -13,6 +15,108 @@ class Node:
 
 
 def solve(node_count, edges):
+    model = cp_model.CpModel()
+    edges_adjacents = [
+        (
+            node,
+            [
+                elem[0] if elem[0] != node else elem[1]
+                for elem in list(
+                    filter(lambda x: (x[0] == node or x[1] == node), edges)
+                )
+            ],
+        )
+        for node in range(node_count)
+    ]
+
+    NVARIABLES, NCOLORS = node_count, node_count
+    print(NVARIABLES, NCOLORS)
+
+    color_array = np.array(
+        [
+            [model.NewBoolVar(f"v{i}_c{j}") for j in range(NCOLORS)]
+            for i in range(NVARIABLES)
+        ]
+    )
+    for row in range(len(color_array)):
+        for col in range(len(color_array.T)):
+            model.AddHint(color_array[row, col], row == col)
+
+    # cliques = find_cliques_simple(edges_adjacents)
+    # for clique in cliques:
+    #     for color_index in range(NCOLORS):
+    #         model.Add(
+    #             sum(
+    #                 color_array[clique_index, color_index]
+    #                 for clique_index in clique
+    #             )
+    #             <= 1
+    #         )
+
+    maximum_color_number = model.NewIntVar(
+        0,
+        node_count,
+        "max_number_color",
+    )
+
+    for color_row in color_array:
+        model.Add(
+            sum(i * color for i, color in enumerate(color_row))
+            <= maximum_color_number
+        )
+        model.Add(sum(color_row) == 1)
+
+    for col_index in range(color_array.shape[1] - 1):
+        model.Add(
+            sum(color_array[:, col_index])
+            >= sum(color_array[:, col_index + 1])
+        )
+
+    for edge in edges:
+        for color_index in range(NCOLORS):
+            model.Add(
+                (
+                    color_array[edge[0], color_index]
+                    + color_array[edge[1], color_index]
+                )
+                <= 1
+            )
+
+    model.Minimize(maximum_color_number)
+
+    print("TOP")
+    solver = cp_model.CpSolver()
+    solver.parameters.max_time_in_seconds = 5.0
+    status = solver.Solve(model)
+
+    if status in [cp_model.OPTIMAL, cp_model.FEASIBLE]:
+
+        solution = [
+            sum(
+                solver.Value(color_array[variable_index, color_index])
+                * color_index
+                for color_index in range(NCOLORS)
+            )
+            for variable_index in range(NVARIABLES)
+        ]
+
+        print(
+            [
+                sum(np.array(solution) == color_index)
+                for color_index in range(NCOLORS)
+            ]
+        )
+    else:
+        raise ValueError("CP solver has not converge")
+
+    return (
+        list(set(solution)),
+        solution,
+        cp_model.OPTIMAL == status,
+    )
+
+
+def solve_old(node_count, edges):
     model = cp_model.CpModel()
     edges_adjacents = [
         (
@@ -58,6 +162,16 @@ def solve(node_count, edges):
         solver.parameters.max_time_in_seconds = 20.0
     else:
         solver.parameters.max_time_in_seconds = 300.0
+
+    color_array = np.array(
+        [[model.NewBoolVar(f"v{i}_c{j}") for j in COLORS] for i in variables]
+    )
+
+    for color_index in range(node_count):
+        model.Add(
+            sum(variable == color_index for variable in variables)
+            >= sum(variable == (color_index + 1) for variable in variables)
+        )
 
     for edge in edges:
         model.Add(variables[edge[0]] != variables[edge[1]])
