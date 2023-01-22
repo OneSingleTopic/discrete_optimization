@@ -1,50 +1,20 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+import sys
 import math
-from collections import namedtuple
-import numpy as np
 from pathlib import Path
-from my_solvers import local_search
-
-Point = namedtuple("Point", ["x", "y"])
-
-
-def length(point1, point2):
-    return math.sqrt((point1.x - point2.x) ** 2 + (point1.y - point2.y) ** 2)
-
+from ttp_solvers import local_search, data
 
 def solve_it(input_data):
-    # Modify this code to run your optimization algorithm
 
     # parse the input
-    lines = input_data.split("\n")
+    points = data.read_data(input_data)
 
-    nodeCount = int(lines[0])
-
-    points = []
-    for i in range(1, nodeCount + 1):
-        line = lines[i]
-        parts = line.split()
-        points.append(Point(float(parts[0]), float(parts[1])))
-
-    # build a trivial solution
     # visit the nodes in the order they appear in the file
-    solution, optimal = local_search.solve(np.array(points), Path("media"))
+    solution, length, optimal = local_search.solve(np.array(points), Path("media"))
 
-    # calculate the length of the tour
-    obj = length(points[solution[-1]], points[solution[0]])
-    for index in range(0, nodeCount - 1):
-        obj += length(points[solution[index]], points[solution[index + 1]])
+    return data.prepare_output(solution, length, optimal)
 
-    # prepare the solution in the specified output format
-    output_data = "%.2f" % obj + " " + str(optimal) + "\n"
-    output_data += " ".join(map(str, solution))
-
-    return output_data
-
-
-import sys
 
 if __name__ == "__main__":
     import sys
